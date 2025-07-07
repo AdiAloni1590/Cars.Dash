@@ -1,158 +1,94 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>שביעות רצון לפי סוג רכב</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #43cea2, #185a9d);
-            color: #fff;
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .description {
-            max-width: 800px;
-            margin: 0 auto 40px;
-            text-align: center;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-
-        .tableau-section {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        tableau-viz {
-            width: 100%;
-            height: 800px;
-        }
-
-        .back-button {
-            display: block;
-            margin: 20px auto;
-            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
-            border: none;
-            padding: 10px 20px;
-            font-size: 1rem;
-            color: white;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-
-        .back-button:hover {
-            transform: translateY(-3px);
-        }
-
-        footer {
-            margin-top: auto;
-            text-align: center;
-            padding: 20px;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            tableau-viz {
-                height: 600px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מערכת 1 - דאשבורד ניהולי | מגה ספורט</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f7fafc, #e2e8f0);
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      color: #2d3748;
+    }
+    header {
+      background: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .nav-link {
+      transition: color 0.2s ease;
+    }
+    .nav-link:hover {
+      color: #4b6cb7;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>מערכת 1 - שביעות רצון לפי סוג רכב</h1>
-    </header>
+  <header class="py-4 sticky top-0 z-50">
+    <nav class="container flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-gray-800">מערכת ניתוחים - מגה ספורט</h1>
+      <div class="space-x-6">
+        <a href="index.html" class="nav-link text-gray-600 text-lg font-medium">חזרה לדף הראשי</a>
+      </div>
+    </nav>
+  </header>
 
-    <section class="description">
-        <p>ויזואליזציה זו מציגה נתונים על שביעות רצון לקוחות לפי סוגי רכבים שונים, תוך התמקדות במדדי איכות, נוחות ושביעות רצון כללית.</p>
+  <main class="container py-12">
+    <section class="card p-8 mb-12">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">הניתוח הניהולי - מגה ספורט</h2>
+      <p class="text-lg text-gray-600 max-w-3xl">
+        בדאשבורד הזה ניתחתי את הרווח הממוצע של מגה ספורט לפי מותגים שונים של נעליים. בעזרת שדה שחישבתי בטאבלו שנקרא "רווח לשקלים", בדקתי אילו מותגים מכניסים הכי הרבה כסף לחברה. הדשבורד מציג עמודות בצבעים שונים לפי גובה הרווח, עם מספרים על כל עמודה כדי להמחיש את הפערים בין המותגים. המטרה היא לעזור למנהלים להבין איזה מותגים שווה לקדם ואיפה אפשר לשפר.
+      </p>
     </section>
 
-    <section class="tableau-section" id="tableau">
-        <script type="module" src="https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js"></script>
-        <tableau-viz 
-            id="tableauViz"
-            src="https://public.tableau.com/views/Dashboard1_17457522444630/DashBoard1"
-            toolbar="bottom"
-            hide-tabs
-            width="100%"
-            height="800">
-        </tableau-viz>
+    <section class="card p-8">
+      <h3 class="text-2xl font-bold text-gray-800 mb-4">דאשבורד ניהולי</h3>
+      <div class="tableauPlaceholder" id="vizManagement" style="position: relative">
+        <noscript>
+          <a href="#"><img alt="Dashboard1" src="https://public.tableau.com/static/images/Pr/Project-_17518829425370/sheet2/1.png" style="border: none" /></a>
+        </noscript>
+        <object class="tableauViz" style="display:none;">
+          <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+          <param name="embed_code_version" value="3" />
+          <param name="site_root" value="" />
+          <param name="name" value="Project-_17518829425370/sheet2" />
+          <param name="tabs" value="no" />
+          <param name="toolbar" value="yes" />
+          <param name="static_image" value="https://public.tableau.com/static/images/Pr/Project-_17518829425370/sheet2/1.png" />
+          <param name="animate_transition" value="yes" />
+          <param name="display_static_image" value="yes" />
+          <param name="display_spinner" value="yes" />
+          <param name="display_overlay" value="yes" />
+          <param name="display_count" value="yes" />
+          <param name="language" value="he-IL" />
+        </object>
+      </div>
+      <script type="text/javascript">
+        var divElement = document.getElementById('vizManagement');
+        var vizElement = divElement.getElementsByTagName('object')[0];
+        vizElement.style.width = '100%';
+        vizElement.style.height = (divElement.offsetWidth < 500 ? '727px' : '827px');
+        var scriptElement = document.createElement('script');
+        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+        vizElement.parentNode.insertBefore(scriptElement, vizElement);
+      </script>
     </section>
+  </main>
 
-    <button class="back-button" onclick="window.location.href='index.html'">חזור לדף הראשי</button>
-
-    <footer>
-        <p>© 2025 מערכת ויזואליזציה לרכבים - כל הזכויות שמורות</p>
-    </footer>
+  <footer class="py-6 bg-white shadow-inner text-center">
+    <p class="text-gray-600">© 2025 עדי | ניתוח מגה ספורט. כל הזכויות שמורות.</p>
+  </footer>
 </body>
 </html>
